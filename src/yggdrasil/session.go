@@ -533,6 +533,7 @@ func (sinfo *sessionInfo) doSend(bs []byte) {
 	coords := sinfo.coords
 	// Read IPv6 flowlabel field (20 bits).
 	// Assumes packet at least contains IPv6 header.
+	classselector := (bs[0]<<4 | bs[1]>>4) >> 3
 	flowkey := uint64(bs[1]&0x0f)<<16 | uint64(bs[2])<<8 | uint64(bs[3])
 	// Check if the flowlabel was specified
 	if flowkey == 0 {
@@ -555,6 +556,7 @@ func (sinfo *sessionInfo) doSend(bs []byte) {
 	// traffic streams into independent queues
 	if flowkey != 0 {
 		coords = append(coords, 0)                // First target the local switchport
+		coords = append(coords, classselector)    // Then the class selector
 		coords = wire_put_uint64(flowkey, coords) // Then variable-length encoded flowkey
 	}
 	// Prepare the payload
