@@ -44,6 +44,7 @@ cat > wix.xml << EOF
       InstallerVersion="100"
       Languages="1033"
       Compressed="yes"
+      Platform="${PKGARCH}"
       SummaryCodepage="1252" />
 
     <Media
@@ -103,7 +104,7 @@ cat > wix.xml << EOF
               KeyPath="yes"/>
           </Component>
 
-        <!--  <Merge Id="Wintun" Language="1033" SourceFile="wintun.msm" DiskId="1" /> -->
+          <Merge Id="Wintun" Language="1033" SourceFile="wintun.msm" DiskId="1" />
 
         </Directory>
       </Directory>
@@ -130,6 +131,16 @@ cat > wix.xml << EOF
   </Product>
 </Wix>
 EOF
+
+# Download the Wintun driver
+if [ $PKGARCH = "x64" ]; then
+  curl -o wintun.msm https://www.wintun.net/builds/wintun-amd64-0.7.msm || (echo "couldn't get wintun"; exit 1)
+elif [ $PKGARCH = "x86" ]; then
+  curl -o wintun.msm https://www.wintun.net/builds/wintun-x86-0.7.msm || (echo "couldn't get wintun"; exit 1)
+else
+  echo "wasn't sure which architecture to get wintun for"
+  exit 1
+fi
 
 # Generate the MSI
 wixl wix.xml -o yggdrasil.msi
