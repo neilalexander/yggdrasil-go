@@ -161,6 +161,12 @@ jobs:
               git config --global user.name "$(git log --format='%an' HEAD -1)";
 
       - run:
+          name: Install MSI utilities
+          command: |
+              sudo apt-get update
+              sudo apt-get install -y wixl
+
+      - run:
           name: Build for OpenBSD
           command: |
               rm -f {yggdrasil,yggdrasilctl}
@@ -178,8 +184,8 @@ jobs:
           name: Build for Windows
           command: |
               rm -f {yggdrasil,yggdrasilctl}
-              GOOS=windows GOARCH=amd64 ./build && mv yggdrasil.exe /tmp/upload/$CINAME-$CIVERSION-windows-amd64.exe && mv yggdrasilctl.exe /tmp/upload/$CINAME-$CIVERSION-yggdrasilctl-windows-amd64.exe;
-              GOOS=windows GOARCH=386 ./build && mv yggdrasil.exe /tmp/upload/$CINAME-$CIVERSION-windows-i386.exe && mv yggdrasilctl.exe /tmp/upload/$CINAME-$CIVERSION-yggdrasilctl-windows-i386.exe;
+              GOOS=windows GOARCH=amd64 ./build && sh contrib/msi/create-wix.sh x64 && mv yggdrasil.exe /tmp/upload/$CINAME-$CIVERSION-windows-amd64.exe && mv yggdrasilctl.exe /tmp/upload/$CINAME-$CIVERSION-yggdrasilctl-windows-amd64.exe && mv yggdrasil.msi /tmp/upload/$CINAME-$CIVERSION-windows-x64.msi;
+              GOOS=windows GOARCH=386 ./build && sh contrib/msi/create-wix.sh x86 && mv yggdrasil.exe /tmp/upload/$CINAME-$CIVERSION-windows-i386.exe && mv yggdrasilctl.exe /tmp/upload/$CINAME-$CIVERSION-yggdrasilctl-windows-i386.exe  && mv yggdrasil.msi /tmp/upload/$CINAME-$CIVERSION-windows-x86.msi;
 
       - persist_to_workspace:
           root: /tmp
